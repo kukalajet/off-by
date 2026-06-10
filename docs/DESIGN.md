@@ -7,7 +7,7 @@
 | **Out of scope** | Visual / art direction (explore in Figma); core-loop behaviour (see [PRD §6](./PRD.md)); per-screen pixel detail |
 | **Status** | Draft v0.1 |
 | **Owner** | _TBD_ |
-| **Last updated** | 2026-06-09 |
+| **Last updated** | 2026-06-10 |
 
 ---
 
@@ -15,9 +15,9 @@
 
 **Home-as-launchpad, hub-and-spoke. No persistent tab bar.**
 
-- Cold-open lands on **Home, which *is* the Classic Prompt** — the target and a thumb-sized **Start** are right there, so app-open to first round is effectively one tap (the "instant play" promise, [PRD §10](./PRD.md)).
+- Cold-open lands on **Home, the launchpad** — a thumb-sized **Start** is right there, so app-open to first round is effectively one tap (the "instant play" promise, [PRD §10](./PRD.md)). The target itself is **rolled per round and revealed at the round's Ready state**, not on Home — Home teases it with a mystery `?.??s` so it never shows a stale number ([PRD §6](./PRD.md)).
 - Everything else (modes, stats, shop, settings, leaderboards) hangs off Home as **thumb-reachable affordances**, not a nav bar. A persistent bottom nav adds chrome the loop doesn't want and fights the "whole screen is the tap target" rule.
-- **Play surfaces (Run / Reveal) are full-bleed and chrome-free.** You leave the loop only via **Menu** on Reveal; the *default* Reveal action is **Retry**, which stays in the loop.
+- **Play surfaces (Ready / Run / Reveal) are full-bleed and chrome-free.** Ready carries the rolled target and *nothing else* — no stats, no pills, no nudges compete with the read. You leave the loop only via **Menu** on Reveal; the *default* Reveal action is **Retry**, which stays in the loop.
 
 This is the highest-leverage structural decision — it shapes every frame. Confirm it before drawing (see §5).
 
@@ -32,8 +32,8 @@ This is the highest-leverage structural decision — it shapes every frame. Conf
 | Screen | Purpose & key contents | PRD |
 |---|---|---|
 | **Onboarding** *(first run only)* | One guided Classic round, no text walls; teaches tap-start / tap-stop; flows straight into Home | [§6](./PRD.md), F-8 |
-| **Home / Prompt** | Cold-open target; thumb **Start**; streak + daily nudge; affordances to modes / stats / shop / settings | [§6](./PRD.md), [§10](./PRD.md), F-1 |
-| **Round** *(Run + Guess)* | Full-bleed; elapsed count **hidden**; whole screen = **Stop**; neutral ambient only | [§6](./PRD.md), F-2, F-3 |
+| **Home** | Launchpad: mystery target `?.??s` + thumb **Start**; streak + daily nudge; affordances to modes / stats / shop / settings | [§6](./PRD.md), [§10](./PRD.md) |
+| **Round** *(Ready + Run + Guess)* | Full-bleed. **Ready:** rolled target, big and alone — distraction-free; tap to start. **Run:** elapsed **hidden**, dim static target reminder only; whole screen = **Stop** | [§6](./PRD.md), F-1, F-2, F-3 |
 | **Reveal** ⭐ | Showpiece: **signed delta** (hero, 2-dec), player time, target, tier badge + scaled juice, coins; **Retry** (default) / Share / Menu | [§6](./PRD.md), [§9.1](./PRD.md), F-4–F-6 |
 | **Stats** *(min)* | Best + **signed bias**; full closeness/bias/consistency trends land in P1 | F-7, F-10 |
 | **Settings** *(min)* | Toggle haptics / sound / distraction; reset stats; notifications; restore purchases | [§10](./PRD.md) |
@@ -79,12 +79,14 @@ One surface, four states ([PRD §6](./PRD.md)). This is where most of the design
 
 | State | Lives on | What's on screen |
 |---|---|---|
-| **Prompt** | Home | Target time (big), **Start** (thumb zone), streak / daily nudge |
-| **Run** | Round | **Nothing that reveals elapsed time.** Neutral ambient only; whole screen is the Stop target |
+| **Ready** | Round | The **freshly rolled target, big and alone** — nothing else competes with the read. Tap anywhere to start |
+| **Run** | Round | **Nothing that reveals elapsed time.** Dim static target reminder + neutral ambient only; whole screen is the Stop target |
 | **Guess** | Round | The Stop tap — captured at the input event ([PRD §11.1](./PRD.md)); a transition, not a screen |
 | **Reveal** | Reveal | Signed delta (hero), player time, target, tier badge, coins; juice scaled to tier; **Retry / Share / Menu** |
 
-Reveal → Retry → Run must be near-instantaneous — protect it from any interstitial ([PRD §6](./PRD.md)).
+(Home is the launchpad, not a loop state — it tees up the round with `?.??s` + **Start**.)
+
+Reveal → Retry → next Ready must be near-instantaneous — protect it from any interstitial ([PRD §6](./PRD.md)). Ready → Run is one tap; the read-the-target beat is part of the round, not friction.
 
 ---
 
@@ -95,10 +97,11 @@ flowchart TD
   Cold([Cold open]) --> FR{First run?}
   FR -- yes --> Onb["Onboarding<br/>1 guided round"]
   FR -- no --> Home
-  Onb --> Home["Home / Prompt<br/>target + Start + hub"]
-  Home -->|Start| Run["Run<br/>count hidden · screen = Stop"]
+  Onb --> Home["Home<br/>?.??s + Start + hub"]
+  Home -->|Start| Ready["Ready<br/>rolled target · alone"]
+  Ready -->|tap| Run["Run<br/>count hidden · dim reminder · screen = Stop"]
   Run -->|tap| Rev["Reveal ⭐<br/>signed delta · tier · coins"]
-  Rev -->|"Retry · default"| Run
+  Rev -->|"Retry · default<br/>new roll"| Ready
   Rev -->|Share| Card["Share card"]
   Rev -->|Menu| Home
   Home --> Modes["Modes"]
@@ -111,7 +114,7 @@ flowchart TD
   Home --> Settings
   Home --> LB["Leaderboards"]
   Rev -. "every N rounds" .-> Ad["Interstitial"]
-  Ad --> Run
+  Ad --> Ready
 ```
 
 The interstitial edge is **count-gated** and never fires on the near-miss → Retry beat ([PRD §9.3](./PRD.md)).

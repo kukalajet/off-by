@@ -92,14 +92,16 @@ Targets below are initial benchmarks for a hyper-casual title; tune against live
 
 The loop is four states. Latency and clarity at each transition are what make the game feel good.
 
-1. **Prompt** — A target time is shown clearly (e.g. `5.00s`) with a single primary action: **Start**.
-2. **Run** — On tap-down the timer begins and the on-screen number **immediately hides** (the screen may show neutral/ambient feedback but never the elapsed count). The same button now reads **Stop** (or the whole screen is tappable).
+1. **Ready** — The round opens on a **freshly rolled random target** (e.g. `7.30s`), shown big and **alone on a distraction-free screen** — no chrome, no stats, no nudges. Reading the target is part of every round, so this state must carry nothing that competes with it. Tap anywhere to start.
+2. **Run** — On tap-down the timer begins and the screen empties to neutral/ambient feedback plus a **dim, static target reminder** ("aim for 7.30s") — never the elapsed count. The whole screen is tappable.
 3. **Guess** — Player taps again to stop. The exact elapsed time is captured at the input event (see §11.1).
 4. **Reveal** — The game animates the result: the player's time, the target, and the signed delta ("**Off by +0.03s**" / "**−0.12s**"), plus an accuracy tier, coins earned, and a haptic/audio flourish scaled to how close they were.
 
-From Reveal the player can: **Retry** (same or new target), **Share**, or return to menu. The default, most prominent action is the next attempt.
+From Reveal the player can: **Retry** (a **new random target** — never a replay of the same value), **Share**, or return to menu. The default, most prominent action is the next attempt.
 
-**Critical loop principle:** the time from Reveal to the next Run must be near-instantaneous. Any friction here (a forced interstitial, a slow animation, a confirmation tap) directly suppresses rounds-per-session, the north-star metric. Interstitials are gated on round *count*, never inserted between a near miss and its retry.
+Because the target is rolled per round, the value can't live on the Home screen — Home shows a mystery placeholder (`?.??s`) and the roll is revealed at the Ready state. This is deliberate: it keeps Home honest (it never shows a stale number) and makes every round a fresh **sight-read**, not a memorized rhythm.
+
+**Critical loop principle:** the time from Reveal to the next round's Ready state must be near-instantaneous, and Ready→Run is a single tap with no added latency. Any friction beyond that one deliberate read-the-target beat (a forced interstitial, a slow animation, a confirmation tap) directly suppresses rounds-per-session, the north-star metric. Interstitials are gated on round *count*, never inserted between a near miss and its retry.
 
 **Round bounds & misfires.** A round auto-resolves as a Miss after a generous hard ceiling (e.g. 30s) so a forgotten Stop can't hang the session. A stop faster than human intent allows (e.g. < 100ms) is treated as a misfire — discarded, not scored — protecting both the player's stats and ranked integrity (§11.3).
 
@@ -109,7 +111,7 @@ From Reveal the player can: **Retry** (same or new target), **Share**, or return
 
 | Mode | Description | Priority |
 |---|---|---|
-| **Classic** | Single round against a fixed or random target. The default. | **P0** |
+| **Classic** | Single round against a **random target, re-rolled every round — including instant retries**. The default. | **P0** |
 | **Practice** | Unscored, no-stakes loop with richer per-round feedback — your running bias, consistency, and a coaching nudge ("you stopped 0.06s early; hold one more beat"). The self-improver's home and the best Daily Challenge on-ramp. No coins, no leaderboard: the feedback *is* the reward. | **P1** |
 | **Gauntlet** | Consecutive rounds with escalating targets; one "miss" (outside a tolerance band) ends the run. Produces a score = rounds survived / cumulative accuracy. | **P1** |
 | **Daily Challenge** | One shared target (and modifier) per day via a global seed, so every player faces the same test — ideal for comparison and sharing. One scored attempt; unlimited practice. | **P1** |
@@ -117,7 +119,7 @@ From Reveal the player can: **Retry** (same or new target), **Share**, or return
 | **Blindfold** | Maximal sensory deprivation: blank screen, no ambient cues, optional silence. Pure internal-clock test. | **P2** |
 | **Pass-and-Play** | Local multiplayer: 2+ players take turns on the same device against a shared target; the app tracks turns and declares a winner. No network needed. | **P1** |
 
-**Target generation:** Classic/Gauntlet draw from a tuned range (proposed 1.00–15.00s; sub-~1s targets are reaction-dominated rather than internal-clock tests, so keep the floor sensible). Avoid only "round" targets — odd targets (e.g. 7.30s) are harder, feel fresher, *and* make a pre-set external metronome useless, since the player must still track the fractional remainder internally (§11.3). Daily Challenge uses a date-seeded RNG so the value is identical for all players that day.
+**Target generation:** Classic/Gauntlet draw from a tuned range (proposed 1.00–15.00s; sub-~1s targets are reaction-dominated rather than internal-clock tests, so keep the floor sensible). Avoid only "round" targets — odd targets (e.g. 7.30s) are harder, feel fresher, *and* make a pre-set external metronome useless, since the player must still track the fractional remainder internally (§11.3). **Classic re-rolls on every round, including Retry** — repeating a value would let players grind one rhythm into muscle memory and trivialize the skill (and the same logic that blunts metronomes in §11.3 applies to self-metronoming via repetition). Practice follows the same re-roll rule. **Modes with their own target contract are exempt:** Daily Challenge uses a date-seeded RNG so the value is identical for all players that day; Challenge-a-friend replays the exact shared seed; Pass-and-Play holds one target per game so turns are comparable; Gauntlet's escalation sets its own sequence.
 
 ---
 
@@ -126,12 +128,12 @@ From Reveal the player can: **Retry** (same or new target), **Share**, or return
 Prioritization: **P0** = MVP / must-ship. **P1** = fast-follow for retention & virality. **P2** = later.
 
 ### 8.1 Core (P0)
-- **F-1** Display a target time clearly before the round.
-- **F-2** Start timer on tap-down; hide the elapsed count for the duration of the Run state.
+- **F-1** Roll a random target per round and display it clearly at round start (Ready state), on a distraction-free screen. Re-roll on every Retry.
+- **F-2** Start timer on tap-down; hide the elapsed count for the duration of the Run state (a dim static target reminder is allowed — it reveals nothing about elapsed time).
 - **F-3** Capture stop time at the input event using a high-resolution monotonic clock (§11.1).
 - **F-4** Reveal: player time, target, signed delta (two decimals — see §10, §11.2), and accuracy tier.
 - **F-5** Scaled feedback on reveal — haptics + sound + animation whose intensity maps to accuracy.
-- **F-6** Instant **Retry** with minimal friction.
+- **F-6** Instant **Retry** with minimal friction — lands on the next round's Ready state with a fresh target already rolled.
 - **F-7** Local persistence of best result and basic stats (offline-first; no login required).
 - **F-8** First-run experience teaches the loop in one guided round, no text walls.
 
