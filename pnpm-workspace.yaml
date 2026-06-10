@@ -1,6 +1,16 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# React Native / Expo tooling (Metro, babel-preset-expo, and the expo-updates
+# Xcode build phase) resolves transitive packages by bare name via plain Node
+# resolution. pnpm's default `isolated` linker only symlinks DIRECT deps into
+# each package's node_modules, so transitive presets like `babel-preset-expo`
+# are unresolvable and EAS builds fail while constructing the Metro transformer.
+# A hoisted (flat) node_modules layout fixes it. (In pnpm v10+ this setting must
+# live here, not in .npmrc — .npmrc's node-linker is ignored.)
+nodeLinker: hoisted
+
 allowBuilds:
   msgpackr-extract: true
   unrs-resolver: true
