@@ -12,12 +12,14 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useReducedMotion } from 'react-native-reanimated';
 
 import { colors } from '@/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const reduceMotion = useReducedMotion();
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -50,6 +52,10 @@ export default function RootLayout() {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: colors.bg.base },
+          // Prototype: forward = push-left 300ms, back mirrors it. Reduce
+          // motion swaps the slide for a fade from day one (PLAN §Phase 1).
+          animation: reduceMotion ? 'fade' : 'slide_from_right',
+          animationDuration: 300,
         }}
       />
     </GestureHandlerRootView>

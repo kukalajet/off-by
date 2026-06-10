@@ -2,13 +2,15 @@ import { type Rng, systemRng } from './rng';
 import type { Centiseconds } from './units';
 
 /**
- * Target generation rules (PRD §7): uniform 1.00–15.00 s at 2 dp, biased away
+ * Target generation rules (PRD §7): uniform 0.10–7.00 s at 2 dp, biased away
  * from "clean" endings (x.00 / x.50) that read as countable rhythms.
  * Expressed as data so feel-tuning is a constant change (OTA-able).
+ * Range decided 2026-06-10; the floor sits at the misfire cutoff (§6) — the
+ * lowest value a stop can legally score.
  */
 export const TARGET_RULES = {
-  minCs: 100,
-  maxCs: 1500,
+  minCs: 10,
+  maxCs: 700,
   cleanEndings: [0, 50] as readonly number[],
   cleanRerollChance: 0.85,
   maxRerolls: 2,

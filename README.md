@@ -25,7 +25,11 @@ pnpm --filter mobile ios      # build + run the dev client locally
 pnpm --filter mobile android
 ```
 
-The app uses Unistyles 3 (C++/Nitro) and so **does not run in Expo Go** — use a development build (`eas build --profile development` or the local run commands above). In-app routes `/tokens` (design-token gallery vs Figma) and `/spike` (Phase 0 timing harness) are dev utilities.
+The app uses Unistyles 3 (C++/Nitro) and so **does not run in Expo Go** — use a development build (`eas build --profile development` or the local run commands above). In-app routes `/tokens` (design-token gallery vs Figma) and `/spike` (Phase 0 timing harness) are dev utilities — in dev builds, long-press the Home launcher's **Settings** for `/tokens` and **Stats** for `/spike`.
+
+## Status
+
+Phase 1 (core loop vertical slice) is implemented: Home → Ready → Run → Reveal on one round surface, stop time captured at the input event, tier-scaled haptics, coins on reveal, instant Retry with a fresh roll. Next per [PLAN](docs/PLAN.md): the 20-round playtest, then Phase 2 (onboarding, Stats, Settings — the shippable P0).
 
 ## EAS
 

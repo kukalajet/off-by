@@ -44,7 +44,7 @@ Guiding principles:
 
 Screens: **Home** (launchpad: mystery `?.??s` + START; status pills render static), **Round — Ready**, **Round — Run**, **Reveal**.
 
-- Target generator: uniform 1.00–15.00 s, 2 dp, odd-value bias, **re-rolled every round including instant Retry** (PRD §7).
+- Target generator: uniform 0.10–7.00 s (range decided 2026-06-10; floor = the misfire cutoff), 2 dp, odd-value bias, **re-rolled every round including instant Retry** (PRD §7).
 - Loop state machine **Ready → Run → Guess → Reveal** (PRD §6). Whole screen is the tap target in Ready and Run.
 - Tier mapping + signed delta. Strawman thresholds (tune later; calibrated so Figma's `+0.04s` reads **Great**): `0.00` bullseye · `≤ 0.02` insane · `≤ 0.10` great · `≤ 0.25` good · `≤ 0.60` close · else miss.
 - Transitions from the prototype: forward push-left / back push-right (300 ms) · **the recede beat** — Ready's solid target sinks to Run's 9 % ghost (150 ms ease-out) · Retry dissolve (120 ms). Reduce-motion variants from day one.

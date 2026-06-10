@@ -3,7 +3,7 @@ import { createSeededRng, seedFromString } from './rng';
 import { TARGET_RULES, generateTarget, isCleanTarget } from './target';
 
 describe('generateTarget', () => {
-  it('stays in [1.00s, 15.00s] at centisecond granularity', () => {
+  it('stays in [0.10s, 7.00s] at centisecond granularity', () => {
     const rng = createSeededRng(42);
     for (let i = 0; i < 10_000; i++) {
       const cs = generateTarget(rng);
@@ -28,8 +28,8 @@ describe('generateTarget', () => {
     const rng = createSeededRng(1234);
     const seen = new Set<number>();
     for (let i = 0; i < 50_000; i++) seen.add(generateTarget(rng));
-    // 1401 possible values; expect the overwhelming majority to appear
-    expect(seen.size).toBeGreaterThan(1200);
+    // 691 possible values; expect the overwhelming majority to appear
+    expect(seen.size).toBeGreaterThan(650);
   });
 
   it('is deterministic per seed — the Daily / Challenge shared-target contract', () => {
