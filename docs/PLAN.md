@@ -4,7 +4,7 @@
 |---|---|
 | **Companion to** | [PRD](./PRD.md) (what/why) · [DESIGN](./DESIGN.md) (structure) · [Figma](https://www.figma.com/design/IF3p3StFTA7FJniCWh7jaL/) (pixel truth, components, wired prototype) |
 | **This doc** | Build order: phases, exit criteria, and the Figma→code map. The *"what first, and why."* |
-| **Stack** | Expo / React Native (TypeScript). Native module only if the Phase 0 timing spike demands it. |
+| **Stack** | Expo / React Native (TypeScript) in a pnpm + Turborepo **monorepo** (backend joins the same repo in Phase 4) — see [SCAFFOLD](./SCAFFOLD.md). Native module only if the Phase 0 timing spike demands it. |
 | **Status** | Draft v0.1 |
 | **Last updated** | 2026-06-10 |
 
@@ -30,13 +30,13 @@ Guiding principles:
 
 ### Phase 0 — Foundations + the timing spike *(gate for everything)*
 
-- Expo scaffold: TypeScript, expo-router, lint/typecheck/test in CI, EAS build profiles.
+- Repo + Expo scaffold per [SCAFFOLD.md](./SCAFFOLD.md): pnpm/Turborepo monorepo (`apps/mobile` now, `apps/api` reserved for Phase 4, shared `packages/core` game rules), Expo SDK 54+ on the New Architecture, expo-router, **expo-dev-client + EAS Update** (channels per build profile, fingerprint runtime policy), CI.
 - **Timing spike — the actual point of this phase.** On at least one real iOS + one mid-tier Android device:
   - Measure tap→timestamp fidelity (gesture event `timeStamp` vs `performance.now()` at JS handler) and haptic trigger latency.
   - Decide: JS-side capture good enough, or JSI/native module needed.
   - Encode round rules from PRD §6: capture at input event · `< 100 ms` = misfire, discarded · `30 s` ceiling = auto-miss.
-- Design-token port from Figma variables → theme module: color (incl. the 6-step tier ramp), spacing, radii (incl. `radius/card` 20, pill), full type ramp (`Overline` → `Hero/Delta` 92 → `Display/*`).
-- Local persistence (MMKV; stats schema v0) + settings store.
+- Design-token port from Figma variables → the **Unistyles 3 theme** ([SCAFFOLD §3](./SCAFFOLD.md)): color (incl. the 6-step tier ramp), spacing, radii (incl. `radius/card` 20, pill), full type ramp (`Overline` → `Hero/Delta` 92 → `Display/*`).
+- Local persistence (MMKV; stats schema v0) + settings store (Zustand with MMKV persistence).
 
 **Exit:** committed spike note with measured per-device noise and the chosen capture path · token-gallery screen renders the theme · cold open to a blank Home < 2 s.
 

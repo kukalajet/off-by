@@ -1,0 +1,22 @@
+# deps
+node_modules/
+
+# tooling caches
+.turbo/
+dist/
+coverage/
+*.log
+.DS_Store
+
+# Expo
+.expo/
+expo-env.d.ts
+web-build/
+
+# CNG: native projects are generated via prebuild, never committed (SCAFFOLD §2)
+apps/mobile/ios/
+apps/mobile/android/
+
+# env
+.env
+.env.*.local
