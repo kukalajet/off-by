@@ -1,3 +1,7 @@
+// Reanimated's native worklets runtime doesn't exist under jest — use the
+// official mock (animations resolve to their end values synchronously).
+jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
+
 // react-native-mmkv v4 is Nitro-based — there's no native runtime under jest,
 // so back the stores with an in-memory Map that mirrors the MMKV surface.
 jest.mock('react-native-mmkv', () => {

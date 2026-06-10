@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import type { ComponentType } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { Screen } from '@/components/screen';
 import { StatusPill } from '@/components/status-pill';
 import { TargetHero } from '@/components/target-hero';
+import { useSettings } from '@/features/settings/store';
 
 /**
  * Home / Prompt (Figma 68:2): the launchpad. The hero is a mystery `?.??s` —
@@ -19,6 +20,12 @@ import { TargetHero } from '@/components/target-hero';
 export default function Home() {
   const router = useRouter();
   const { theme } = useUnistyles();
+  const onboarded = useSettings((s) => s.onboarded);
+
+  // First run lands on the guided round (F-8) — exactly once.
+  if (!onboarded) {
+    return <Redirect href="/onboarding" />;
+  }
 
   return (
     <Screen paddingBottom={28}>
@@ -49,12 +56,14 @@ export default function Home() {
         <LauncherItem
           icon={StatsIcon}
           label="Stats"
+          onPress={() => router.push('/stats')}
           onLongPress={__DEV__ ? () => router.push('/spike') : undefined}
         />
         <LauncherItem icon={ShopIcon} label="Shop" />
         <LauncherItem
           icon={SettingsIcon}
           label="Settings"
+          onPress={() => router.push('/settings')}
           onLongPress={__DEV__ ? () => router.push('/tokens') : undefined}
         />
       </View>
@@ -81,15 +90,24 @@ function StreakChip({ days }: { days: number }) {
 function LauncherItem({
   icon: Icon,
   label,
+  onPress,
   onLongPress,
 }: {
   icon: ComponentType<{ size?: number; color: string }>;
   label: string;
+  onPress?: () => void;
   onLongPress?: () => void;
 }) {
   const { theme } = useUnistyles();
   return (
-    <Pressable style={styles.launcherItem} onLongPress={onLongPress}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={8}
+      style={({ pressed }) => [styles.launcherItem, pressed && onPress && styles.launcherPressed]}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
       <Icon color={theme.colors.text.muted} />
       <Text style={styles.launcherLabel}>{label}</Text>
     </Pressable>
@@ -162,6 +180,9 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     gap: 7,
     paddingVertical: theme.space[4],
+  },
+  launcherPressed: {
+    opacity: 0.6,
   },
   launcherLabel: {
     fontFamily: theme.fontFamily.medium,

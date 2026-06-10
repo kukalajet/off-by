@@ -8,6 +8,7 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
@@ -38,8 +39,23 @@ const GHOST_OPACITY = 0.09;
 /** Run's ambient field is slate on purpose — mint stays the earned color. */
 const SLATE = '#2b3647';
 
+/**
+ * Juice v2 (PRD F-5): the reveal glow blooms in, scaled by tier. Tighter hit →
+ * deeper undershoot + springier settle. Miss gets no bloom at all — quiet
+ * failure (PRD §10).
+ */
+const BLOOM = {
+  bullseye: { from: 0.7, damping: 10 },
+  insane: { from: 0.7, damping: 10 },
+  great: { from: 0.85, damping: 13 },
+  good: { from: 0.85, damping: 13 },
+  close: { from: 0.94, damping: 18 },
+  miss: null,
+} as const;
+
 export default function RoundScreen() {
   const router = useRouter();
+  const { theme } = useUnistyles();
 
   const phase = useRound((s) => s.phase);
   const targetCs = useRound((s) => s.targetCs);
@@ -66,6 +82,7 @@ export default function RoundScreen() {
   const readyChrome = useSharedValue(1);
   const runChrome = useSharedValue(0);
   const revealLayer = useSharedValue(0);
+  const revealBloom = useSharedValue(1);
 
   useEffect(() => {
     const d = (ms: number) => ({ duration: reduceMotion ? 0 : ms });
@@ -81,14 +98,22 @@ export default function RoundScreen() {
       runChrome.set(withTiming(1, recede));
     } else {
       revealLayer.set(withTiming(1, d(REVEAL_MS)));
+      const bloom = result?.kind === 'scored' ? BLOOM[result.tier] : null;
+      if (bloom && !reduceMotion) {
+        revealBloom.set(bloom.from);
+        revealBloom.set(withSpring(1, { damping: bloom.damping, stiffness: 160 }));
+      } else {
+        revealBloom.set(1);
+      }
     }
-  }, [phase, reduceMotion, heroOpacity, readyChrome, runChrome, revealLayer]);
+  }, [phase, result, reduceMotion, heroOpacity, readyChrome, runChrome, revealLayer, revealBloom]);
 
   const heroStyle = useAnimatedStyle(() => ({ opacity: heroOpacity.get() }));
   const readyChromeStyle = useAnimatedStyle(() => ({ opacity: readyChrome.get() }));
   const runChromeStyle = useAnimatedStyle(() => ({ opacity: runChrome.get() }));
   const playLayerStyle = useAnimatedStyle(() => ({ opacity: 1 - revealLayer.get() }));
   const revealLayerStyle = useAnimatedStyle(() => ({ opacity: revealLayer.get() }));
+  const bloomStyle = useAnimatedStyle(() => ({ transform: [{ scale: revealBloom.get() }] }));
 
   /**
    * Whole-screen tap target (PRD §10). Captured at touch-down via the input
@@ -102,7 +127,19 @@ export default function RoundScreen() {
   };
 
   return (
-    <View style={styles.root} onTouchStart={phase === 'reveal' ? undefined : onSurfaceTouch}>
+    <View
+      style={styles.root}
+      onTouchStart={phase === 'reveal' ? undefined : onSurfaceTouch}
+      accessible={phase !== 'reveal'}
+      accessibilityRole={phase === 'reveal' ? undefined : 'button'}
+      accessibilityLabel={
+        phase === 'ready'
+          ? `Target ${formatSeconds(targetCs)}. Tap anywhere to start.`
+          : phase === 'running'
+            ? 'Timer running. Tap anywhere to stop.'
+            : undefined
+      }
+    >
       {/* Full-bleed and chrome-free — the status clock has no business here. */}
       <StatusBar hidden />
 
@@ -154,6 +191,15 @@ export default function RoundScreen() {
             { pointerEvents: phase === 'reveal' ? 'auto' : 'none' },
           ]}
         >
+          <Animated.View style={[styles.revealGlow, bloomStyle]}>
+            {/* Miss keeps the wash barely-there — failure stays quiet. */}
+            <Glow
+              size={560}
+              blur={24}
+              color={theme.colors.tier[result.kind === 'scored' ? result.tier : 'miss']}
+              opacity={result.kind === 'scored' && result.tier !== 'miss' ? 0.12 : 0.07}
+            />
+          </Animated.View>
           <Reveal
             result={result}
             targetCs={targetCs}
@@ -184,7 +230,6 @@ function Reveal({
 
   return (
     <Screen>
-      <Glow size={560} blur={24} color={tierColor} opacity={0.12} style={styles.revealGlow} />
       <View
         style={[
           styles.tierBadge,

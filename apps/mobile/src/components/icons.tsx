@@ -11,6 +11,38 @@ interface IconProps {
   color: string;
 }
 
+/** Figma `icon/chevron-left` — back affordance chevron, 20px. */
+export function ChevronLeftIcon({ size = 20, color }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+      <Path
+        d="M12.5 4.5 L7 10 L12.5 15.5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
+
+/** Figma `icon/chevron-right` — forward/disclosure chevron, 18px. */
+export function ChevronRightIcon({ size = 18, color }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 18 18">
+      <Path
+        d="M7 4.5 L11.5 9 L7 13.5"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
+
 /** Figma `icon/play` — start glyph for primary buttons, 15px. */
 export function PlayIcon({ size = 15, color }: IconProps) {
   return (

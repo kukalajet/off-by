@@ -9,9 +9,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'offby',
   userInterfaceStyle: 'dark',
   backgroundColor: '#0a0b0f',
+  // App identity (Phase 2): exported from the Figma App Icon masters —
+  // 296:224 (full-bleed) and 303:224 (Android adaptive foreground).
   icon: './assets/images/icon.png',
   ios: {
-    icon: './assets/expo.icon',
     bundleIdentifier: 'com.kukalajet.offby',
     supportsTablet: false,
     infoPlist: {
@@ -21,9 +22,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: 'com.kukalajet.offby',
     adaptiveIcon: {
-      backgroundColor: '#E6F4FE',
+      backgroundColor: '#0a0b0f',
       foregroundImage: './assets/images/android-icon-foreground.png',
-      backgroundImage: './assets/images/android-icon-background.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
@@ -52,10 +52,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-splash-screen',
       {
         backgroundColor: '#0a0b0f',
-        android: {
-          image: './assets/images/splash-icon.png',
-          imageWidth: 76,
-        },
+        image: './assets/images/splash-icon.png',
+        imageWidth: 120,
       },
     ],
   ],

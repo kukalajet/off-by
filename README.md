@@ -29,7 +29,7 @@ The app uses Unistyles 3 (C++/Nitro) and so **does not run in Expo Go** — use 
 
 ## Status
 
-Phase 1 (core loop vertical slice) is implemented: Home → Ready → Run → Reveal on one round surface, stop time captured at the input event, tier-scaled haptics, coins on reveal, instant Retry with a fresh roll. Next per [PLAN](docs/PLAN.md): the 20-round playtest, then Phase 2 (onboarding, Stats, Settings — the shippable P0).
+Phase 2 (the P0 frame) is implemented: onboarding's guided round, Stats (signed best + bias visualizer), Settings (live toggles, reset-with-confirm), reveal juice v2 (tier-scaled bloom + haptics; sound pack pending assets), and app identity from the Figma icon masters. Earlier: Phase 1's core loop — Home → Ready → Run → Reveal on one surface, input-event timing, coins, instant re-rolled Retry. Next per [PLAN](docs/PLAN.md): internal-distribution build (the P0/soft-launch candidate), then Phase 3 (offline modes).
 
 ## EAS
 
