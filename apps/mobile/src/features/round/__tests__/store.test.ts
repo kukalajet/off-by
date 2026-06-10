@@ -3,7 +3,7 @@ import { COIN_REWARDS, createSeededRng } from '@offby/core';
 import { useStats } from '@/features/stats/store';
 import { useWallet } from '@/features/wallet/store';
 
-import { createRoundStore } from '../store';
+import { createRoundStore, type RoundSink } from '../store';
 
 const stamp = (ms: number) => ({ ms, source: 'clock' as const });
 
@@ -83,6 +83,21 @@ describe('round store', () => {
     expect(s.coinsEarned).toBe(0);
     // Deterministic seed — if these two draws ever collide, change the seed.
     expect(s.targetCs).not.toBe(first);
+  });
+
+  it('a sink returning nextTargetCs chains straight into the next Ready (Gauntlet survive)', () => {
+    const chainSink: RoundSink = () => ({ nextTargetCs: 444 });
+    const store = createRoundStore(createSeededRng(11), chainSink);
+    const target = store.getState().targetCs;
+
+    store.getState().start(stamp(0));
+    store.getState().stop(stamp(target * 10)); // dead-on, resolved
+
+    const s = store.getState();
+    expect(s.phase).toBe('ready'); // no Reveal stop — chained
+    expect(s.targetCs).toBe(444);
+    expect(s.result).toBeNull();
+    expect(useWallet.getState().coins).toBe(0); // sink paid nothing
   });
 
   it('ignores a start while running and a stop while ready', () => {

@@ -29,7 +29,7 @@ The app uses Unistyles 3 (C++/Nitro) and so **does not run in Expo Go** — use 
 
 ## Status
 
-Phase 2 (the P0 frame) is implemented: onboarding's guided round, Stats (signed best + bias visualizer), Settings (live toggles, reset-with-confirm), reveal juice v2 (tier-scaled bloom + haptics; sound pack pending assets), and app identity from the Figma icon masters. Earlier: Phase 1's core loop — Home → Ready → Run → Reveal on one surface, input-event timing, coins, instant re-rolled Retry. Next per [PLAN](docs/PLAN.md): internal-distribution build (the P0/soft-launch candidate), then Phase 3 (offline modes).
+Phase 3 (offline modes) is implemented: the round surface is parameterized (one machine + one surface, modes are sinks + target contracts), and on top of it sit the Modes hub, Practice (unscored reps with live coach/bias/spread), Gauntlet (tightening tolerance band, 3 lives, per-device best), Pass & Play (2–4 players, one shared target, sealed results → standings), and the Goals & streak sheet (freeze-aware streak + seeded daily goals). Everything works with the network off. Earlier: Phase 1 core loop, Phase 2 P0 frame (onboarding, Stats, Settings, juice v2, app identity; sound pack still pending assets). Next per [PLAN](docs/PLAN.md): Phase 4 — Daily Challenge + Leaderboards, the first backend.
 
 ## EAS
 

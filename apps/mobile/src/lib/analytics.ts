@@ -8,7 +8,10 @@ type EventName =
   | 'round_completed'
   | 'round_misfired'
   | 'retry_tapped'
-  | 'share_tapped';
+  | 'share_tapped'
+  | 'practice_round_completed'
+  | 'gauntlet_run_ended'
+  | 'pnp_game_completed';
 
 type EventProps = Record<string, string | number | boolean>;
 

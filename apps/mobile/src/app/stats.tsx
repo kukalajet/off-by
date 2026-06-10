@@ -1,14 +1,14 @@
 import { formatSignedDelta } from '@offby/core';
-import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
+import { BiasScale } from '@/components/bias-scale';
 import { Card } from '@/components/card';
 import { Glow } from '@/components/glow';
 import { ListRow } from '@/components/list-row';
 import { Screen } from '@/components/screen';
 import { UtilityHeader } from '@/components/utility-header';
-import { biasLean, biasRead } from '@/features/stats/bias';
+import { biasRead } from '@/features/stats/bias';
 import { meanBiasCs, useStats } from '@/features/stats/store';
 
 /**
@@ -64,45 +64,6 @@ export default function Stats() {
   );
 }
 
-/**
- * The bias visualizer (Figma 89:5): neutral track, center tick, mint lean
- * fill + marker offset to the player's side. Full scale = ±0.30s.
- */
-function BiasScale({ mean }: { mean: number | null }) {
-  const [trackWidth, setTrackWidth] = useState(0);
-  const lean = mean === null ? 0 : biasLean(mean);
-  const half = trackWidth / 2;
-  const offset = lean * Math.max(0, half - MARKER / 2);
-
-  return (
-    <View style={styles.scale}>
-      <View style={styles.track} onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}>
-        <View style={styles.trackBase} />
-        {trackWidth > 0 && offset !== 0 && (
-          <View
-            style={[
-              styles.lean,
-              offset > 0
-                ? { left: half, width: offset }
-                : { left: half + offset, width: -offset },
-            ]}
-          />
-        )}
-        <View style={[styles.centerTick, { left: half - 1 }]} />
-        {trackWidth > 0 && (
-          <View style={[styles.marker, { left: half + offset - MARKER / 2 }]} />
-        )}
-      </View>
-      <View style={styles.scaleLabels}>
-        <Text style={[styles.scaleLabel, lean < -0.05 && styles.scaleLabelActive]}>EARLY</Text>
-        <Text style={[styles.scaleLabel, lean > 0.05 && styles.scaleLabelActive]}>LATE</Text>
-      </View>
-    </View>
-  );
-}
-
-const MARKER = 14;
-
 const styles = StyleSheet.create((theme) => ({
   screen: {
     gap: theme.space[20],
@@ -151,60 +112,6 @@ const styles = StyleSheet.create((theme) => ({
     fontFamily: theme.fontFamily.regular,
     fontSize: 14,
     color: theme.colors.text.secondary,
-  },
-  scale: {
-    gap: theme.space[8],
-    width: '100%',
-  },
-  track: {
-    height: 20,
-    width: '100%',
-  },
-  trackBase: {
-    position: 'absolute',
-    top: 7,
-    left: 0,
-    right: 0,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: theme.colors.stroke.subtle,
-  },
-  lean: {
-    position: 'absolute',
-    top: 7,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: theme.colors.tier.great,
-  },
-  centerTick: {
-    position: 'absolute',
-    top: 2,
-    width: 2,
-    height: 16,
-    borderRadius: 1,
-    backgroundColor: theme.colors.text.muted,
-  },
-  marker: {
-    position: 'absolute',
-    top: 3,
-    width: MARKER,
-    height: MARKER,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.tier.great,
-    borderWidth: 2,
-    borderColor: theme.colors.bg.surface,
-  },
-  scaleLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  scaleLabel: {
-    ...theme.typography.timeLabel,
-    color: theme.colors.text.muted,
-  },
-  scaleLabelActive: {
-    color: theme.colors.tier.great,
   },
   teaser: {
     width: '100%',

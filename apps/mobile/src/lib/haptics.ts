@@ -40,3 +40,8 @@ export function tierHaptic(tier: Tier) {
 export function misfireHaptic() {
   fire(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning));
 }
+
+/** Run-ending beat (Gauntlet death) — heavier than a quiet per-round miss. */
+export function failureHaptic() {
+  fire(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error));
+}

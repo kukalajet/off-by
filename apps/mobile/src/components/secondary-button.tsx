@@ -6,24 +6,34 @@ import { ShareIcon } from '@/components/icons';
 interface SecondaryButtonProps {
   label: string;
   icon?: 'share';
+  /** Figma `Button/Secondary` tones: Outline (no fill) · Surface (filled, quieter). */
+  tone?: 'outline' | 'surface';
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
-/**
- * Figma `Button/Secondary`, Tone=Outline (246:190): no fill, subtle 1.5px
- * stroke. The Surface tone joins when its first consumer (Gauntlet End) does.
- */
-export function SecondaryButton({ label, icon, onPress, style }: SecondaryButtonProps) {
+/** Figma `Button/Secondary` (246:200): Tone=Outline 246:190 / Tone=Surface 246:191. */
+export function SecondaryButton({
+  label,
+  icon,
+  tone = 'outline',
+  onPress,
+  style,
+}: SecondaryButtonProps) {
   const { theme } = useUnistyles();
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed, style]}
+      style={({ pressed }) => [
+        styles.button,
+        tone === 'surface' && styles.surface,
+        pressed && styles.pressed,
+        style,
+      ]}
     >
       {icon === 'share' && <ShareIcon color={theme.colors.text.primary} />}
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, tone === 'surface' && styles.surfaceLabel]}>{label}</Text>
     </Pressable>
   );
 }
@@ -40,11 +50,19 @@ const styles = StyleSheet.create((theme) => ({
     borderColor: theme.colors.stroke.subtle,
     borderRadius: theme.radius.md,
   },
+  surface: {
+    backgroundColor: theme.colors.bg.surface,
+    borderWidth: 1,
+    paddingVertical: 15,
+  },
   pressed: {
     backgroundColor: theme.colors.bg.surface,
   },
   label: {
     ...theme.typography.buttonSecondary,
     color: theme.colors.text.primary,
+  },
+  surfaceLabel: {
+    color: theme.colors.text.secondary,
   },
 }));

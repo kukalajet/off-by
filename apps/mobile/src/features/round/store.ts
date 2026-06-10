@@ -10,23 +10,57 @@ import {
 } from '@offby/core';
 import { create } from 'zustand';
 
+import { useGoals } from '@/features/goals/store';
 import { useStats } from '@/features/stats/store';
+import { useStreak } from '@/features/streak/store';
 import { useWallet } from '@/features/wallet/store';
 import { logEvent } from '@/lib/analytics';
 import { elapsedMsBetween, type InputStamp } from '@/lib/timing';
 
 /**
- * The loop state machine (PRD §6): Ready → Run → (Guess) → Reveal. Guess is
- * the stop tap itself — `stop()` resolves it synchronously, so it never
- * surfaces as a stored phase. Misfires bounce straight back to Ready with the
- * SAME target: a discarded round never happened, so it isn't re-rolled
- * (re-roll is per *round*, PRD §7).
+ * The loop state machine (PRD §6): Ready → Run → (Guess) → Reveal — ONE
+ * machine for every mode ("one Round surface, parameterized", PLAN §0).
+ * Modes differ only in their `RoundSink` (what a resolved stop does) and in
+ * who supplies the target (`begin(targetCs?)` — Gauntlet's escalation and
+ * Pass & Play's shared target pass one explicitly; Classic/Practice roll).
  *
- * The store stays side-effect-pure on the sensory side: haptics/animation are
- * fired by the screen reacting to phase changes, so tests can drive the
- * machine headlessly with fake stamps.
+ * Universal rules stay here: misfires bounce back to Ready with the SAME
+ * target (a discarded round never happened, PRD §7), the 30s ceiling, and
+ * day-level recording (streak + goal progress) that no mode may skip.
+ *
+ * Sensory side effects (haptics/animation) belong to the surface, not the
+ * machine — tests drive it headlessly with fake stamps.
  */
 export type RoundPhase = 'ready' | 'running' | 'reveal';
+
+export interface RoundSinkOutcome {
+  /** Coins to show on the reveal chip; omit for unscored modes. */
+  coinsEarned?: number;
+  /** Chain straight into the next Ready (Gauntlet survive) instead of Reveal. */
+  nextTargetCs?: Centiseconds;
+}
+
+/** Handles a resolved (never misfired) stop. */
+export type RoundSink = (result: StopResult, targetCs: Centiseconds) => RoundSinkOutcome | void;
+
+/** Classic (PRD §8.1): pay coins by tier, feed lifetime stats. */
+export const classicSink: RoundSink = (result, targetCs) => {
+  const coinsEarned = coinsForResult(result);
+  useWallet.getState().earn(coinsEarned);
+  if (result.kind === 'scored') {
+    logEvent('round_completed', {
+      mode: 'classic',
+      target_cs: targetCs,
+      elapsed_cs: result.elapsedCs,
+      delta_cs: result.deltaCs,
+      tier: result.tier,
+    });
+    useStats.getState().recordRound(result.deltaCs);
+  } else {
+    logEvent('round_completed', { mode: 'classic', target_cs: targetCs, outcome: 'ceiling' });
+  }
+  return { coinsEarned };
+};
 
 interface RoundState {
   phase: RoundPhase;
@@ -36,8 +70,8 @@ interface RoundState {
   coinsEarned: number;
   /** True while Ready is showing the "too fast" notice after a misfire. */
   misfired: boolean;
-  /** Roll a fresh target and arm Ready. Entry point and retry landing. */
-  begin: () => void;
+  /** Arm Ready — with an explicit target, or a fresh roll. */
+  begin: (targetCs?: Centiseconds) => void;
   start: (stamp: InputStamp) => void;
   stop: (stamp: InputStamp) => void;
   /** 30s ceiling fired without a stop tap — auto-resolve as a Miss (PRD §6). */
@@ -47,7 +81,7 @@ interface RoundState {
   reset: () => void;
 }
 
-export function createRoundStore(rng: Rng = systemRng) {
+export function createRoundStore(rng: Rng = systemRng, sink: RoundSink = classicSink) {
   let ceilingTimer: ReturnType<typeof setTimeout> | null = null;
 
   const clearCeiling = () => {
@@ -65,11 +99,11 @@ export function createRoundStore(rng: Rng = systemRng) {
     coinsEarned: 0,
     misfired: false,
 
-    begin: () => {
+    begin: (targetCs) => {
       clearCeiling();
       set({
         phase: 'ready',
-        targetCs: generateTarget(rng),
+        targetCs: targetCs ?? generateTarget(rng),
         startStamp: null,
         result: null,
         coinsEarned: 0,
@@ -98,23 +132,25 @@ export function createRoundStore(rng: Rng = systemRng) {
         return;
       }
 
-      const coinsEarned = coinsForResult(result);
-      useWallet.getState().earn(coinsEarned);
+      const outcome = sink(result, targetCs) ?? {};
 
-      if (result.kind === 'scored') {
-        useStats.getState().recordRound(result.deltaCs);
-        logEvent('round_completed', {
-          target_cs: targetCs,
-          elapsed_cs: result.elapsedCs,
-          delta_cs: result.deltaCs,
-          tier: result.tier,
+      // Day-level recording is universal: every resolved round in every mode
+      // counts toward the streak and the day's goals.
+      useStreak.getState().recordPlay();
+      useGoals.getState().recordResult(result);
+
+      if (outcome.nextTargetCs !== undefined) {
+        set({
+          phase: 'ready',
+          targetCs: outcome.nextTargetCs,
+          startStamp: null,
+          result: null,
+          coinsEarned: 0,
+          misfired: false,
         });
       } else {
-        // Ceiling: a Miss with no honest delta to record — coins only.
-        logEvent('round_completed', { target_cs: targetCs, outcome: 'ceiling' });
+        set({ phase: 'reveal', result, coinsEarned: outcome.coinsEarned ?? 0 });
       }
-
-      set({ phase: 'reveal', result, coinsEarned });
     },
 
     expire: () => {
@@ -134,5 +170,7 @@ export function createRoundStore(rng: Rng = systemRng) {
     },
   }));
 }
+
+export type RoundStore = ReturnType<typeof createRoundStore>;
 
 export const useRound = createRoundStore();
