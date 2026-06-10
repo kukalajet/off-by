@@ -29,4 +29,4 @@ The app uses Unistyles 3 (C++/Nitro) and so **does not run in Expo Go** — use 
 
 ## EAS
 
-Project: `@jetonatssg/off-by`. Build profiles `development` / `preview` / `production` map 1:1 to update channels; `runtimeVersion` uses the fingerprint policy, so JS-only changes ship over the air and native changes fence themselves automatically (see [SCAFFOLD §4](docs/SCAFFOLD.md)).
+Project: `@kukalajet/off-by`. Build profiles `development` / `preview` / `production` map 1:1 to update channels; `runtimeVersion` uses the fingerprint policy, so JS-only changes ship over the air and native changes fence themselves automatically (see [SCAFFOLD §4](docs/SCAFFOLD.md)).

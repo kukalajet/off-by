@@ -14,6 +14,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     icon: './assets/expo.icon',
     bundleIdentifier: 'com.kukalajet.offby',
     supportsTablet: false,
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
   },
   android: {
     package: 'com.kukalajet.offby',
@@ -29,16 +32,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     output: 'static',
     favicon: './assets/images/favicon.png',
   },
-  owner: 'jetonatssg',
+  owner: 'kukalajet',
   runtimeVersion: {
     policy: 'fingerprint',
   },
   updates: {
-    url: 'https://u.expo.dev/98a1be95-0fa9-486a-9cc6-63073eae7ecd',
+    url: 'https://u.expo.dev/0e5404dc-8909-4a45-8c48-dc16386ffd78',
   },
   extra: {
     eas: {
-      projectId: '98a1be95-0fa9-486a-9cc6-63073eae7ecd',
+      projectId: '0e5404dc-8909-4a45-8c48-dc16386ffd78',
     },
   },
   plugins: [
