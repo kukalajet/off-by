@@ -21,6 +21,13 @@ describe('ListRow', () => {
     expect(onValueChange).toHaveBeenCalledWith(false);
   });
 
+  it('"coming soon" rows read as disabled', async () => {
+    await render(<ListRow type="link" label="Notifications" subtitle="Coming soon" soon />);
+    const row = screen.getByRole('button');
+    expect(row.props.accessibilityState).toMatchObject({ disabled: true });
+    expect(screen.getByText('Coming soon')).toBeOnTheScreen();
+  });
+
   it('renders the subtitle line when given', async () => {
     await render(
       <ListRow

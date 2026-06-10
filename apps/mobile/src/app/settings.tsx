@@ -64,9 +64,9 @@ export default function Settings() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>MANAGE</Text>
         <Card>
-          <ListRow type="link" label="Notifications" />
+          <ListRow type="link" label="Notifications" subtitle="Coming soon" soon />
           <Divider />
-          <ListRow type="link" label="Restore purchases" />
+          <ListRow type="link" label="Restore purchases" subtitle="Coming soon" soon />
           <Divider />
           <ListRow type="link" label="Reset stats" danger onPress={confirmReset} />
         </Card>

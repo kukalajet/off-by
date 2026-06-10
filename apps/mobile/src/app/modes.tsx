@@ -23,13 +23,6 @@ export default function Modes() {
         <Card>
           <ListRow
             type="link"
-            label="Daily Challenge"
-            subtitle="Today’s shared target · one scored shot"
-          />
-        </Card>
-        <Card>
-          <ListRow
-            type="link"
             label="Gauntlet"
             subtitle="Escalating rounds · run for score"
             onPress={() => router.push('/gauntlet')}
@@ -53,9 +46,10 @@ export default function Modes() {
         </Card>
       </View>
 
+      {/* Unbuilt modes live here until their phase ships (Daily = P4). */}
       <View style={styles.teaser}>
         <Text style={styles.teaserLabel}>COMING SOON</Text>
-        <Text style={styles.teaserCopy}>Blindfold</Text>
+        <Text style={styles.teaserCopy}>Daily Challenge · Blindfold</Text>
       </View>
 
       <View style={styles.spacer} />

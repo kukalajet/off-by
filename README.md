@@ -29,7 +29,7 @@ The app uses Unistyles 3 (C++/Nitro) and so **does not run in Expo Go** — use 
 
 ## Status
 
-Phase 3 (offline modes) is implemented: the round surface is parameterized (one machine + one surface, modes are sinks + target contracts), and on top of it sit the Modes hub, Practice (unscored reps with live coach/bias/spread), Gauntlet (tightening tolerance band, 3 lives, per-device best), Pass & Play (2–4 players, one shared target, sealed results → standings), and the Goals & streak sheet (freeze-aware streak + seeded daily goals). Everything works with the network off. Earlier: Phase 1 core loop, Phase 2 P0 frame (onboarding, Stats, Settings, juice v2, app identity; sound pack still pending assets). Next per [PLAN](docs/PLAN.md): Phase 4 — Daily Challenge + Leaderboards, the first backend.
+Phase 3 (offline modes) is implemented: the round surface is parameterized (one machine + one surface, modes are sinks + target contracts), and on top of it sit the Modes hub, Practice (unscored reps with live coach/bias/spread), Gauntlet (tightening tolerance band, 3 lives, per-device best), Pass & Play (2–4 players, one shared target, sealed results → standings), and the Goals & streak sheet (freeze-aware streak + seeded daily goals). Everything works with the network off. Earlier: Phase 1 core loop, Phase 2 P0 frame (onboarding, Stats, Settings, juice v2, app identity; sound pack still pending assets). **Phase 4 (Daily + Leaderboards, the first backend) is deferred** — its surfaces are tucked behind "coming soon" treatments (Modes/Stats teasers, disabled Settings rows; Home's Daily pill and Shop launcher hidden until their phases ship).
 
 ## EAS
 

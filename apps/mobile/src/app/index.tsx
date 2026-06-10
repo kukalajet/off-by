@@ -4,10 +4,9 @@ import { Pressable, Text, View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 import { Glow } from '@/components/glow';
-import { FlameIcon, ModesIcon, SettingsIcon, ShopIcon, StatsIcon } from '@/components/icons';
+import { FlameIcon, ModesIcon, SettingsIcon, StatsIcon } from '@/components/icons';
 import { PrimaryButton } from '@/components/primary-button';
 import { Screen } from '@/components/screen';
-import { StatusPill } from '@/components/status-pill';
 import { TargetHero } from '@/components/target-hero';
 import { GoalsSheet } from '@/features/goals/goals-sheet';
 import { useSettings } from '@/features/settings/store';
@@ -41,9 +40,10 @@ export default function Home() {
         opacity={0.14}
         style={styles.floorGlow}
       />
+      {/* The Daily pill returns here when Phase 4 makes it real — a mint
+          "ready" cue for a mode that doesn't exist would be a lie. */}
       <View style={styles.statusRow}>
         <StreakChip days={streakDays} onPress={() => setGoalsOpen(true)} />
-        <StatusPill label="Daily ready" />
       </View>
       <GoalsSheet visible={goalsOpen} onClose={() => setGoalsOpen(false)} />
       <View style={styles.spacerTop} />
@@ -57,6 +57,7 @@ export default function Home() {
       </View>
       <View style={styles.spacerBottom} />
       <View style={styles.launcher}>
+        {/* Shop joins in Phase 6 — a dead launcher among live ones reads broken. */}
         <LauncherItem icon={ModesIcon} label="Modes" onPress={() => router.push('/modes')} />
         <LauncherItem
           icon={StatsIcon}
@@ -64,7 +65,6 @@ export default function Home() {
           onPress={() => router.push('/stats')}
           onLongPress={__DEV__ ? () => router.push('/spike') : undefined}
         />
-        <LauncherItem icon={ShopIcon} label="Shop" />
         <LauncherItem
           icon={SettingsIcon}
           label="Settings"

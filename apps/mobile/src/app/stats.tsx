@@ -5,7 +5,6 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { BiasScale } from '@/components/bias-scale';
 import { Card } from '@/components/card';
 import { Glow } from '@/components/glow';
-import { ListRow } from '@/components/list-row';
 import { Screen } from '@/components/screen';
 import { UtilityHeader } from '@/components/utility-header';
 import { biasRead } from '@/features/stats/bias';
@@ -49,13 +48,10 @@ export default function Stats() {
         <Text style={styles.biasRead}>{biasRead(mean)}</Text>
       </Card>
 
-      <Card>
-        <ListRow type="link" label="Leaderboards" subtitle="Banded, not ranked" />
-      </Card>
-
+      {/* Leaderboards go live with the Phase 4 backend; trends are P1 scope. */}
       <View style={styles.teaser}>
-        <Text style={styles.sectionLabel}>COMING IN P1</Text>
-        <Text style={styles.teaserCopy}>Trends · closeness · bias · consistency</Text>
+        <Text style={styles.sectionLabel}>COMING SOON</Text>
+        <Text style={styles.teaserCopy}>Leaderboards · trends · consistency</Text>
       </View>
 
       <View style={styles.spacer} />

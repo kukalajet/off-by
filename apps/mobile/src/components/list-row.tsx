@@ -13,7 +13,7 @@ interface BaseProps {
 
 type ListRowProps = BaseProps &
   (
-    | { type: 'link'; onPress?: () => void }
+    | { type: 'link'; onPress?: () => void; soon?: boolean }
     | { type: 'toggle'; value: boolean; onValueChange: (v: boolean) => void }
   );
 
@@ -25,10 +25,13 @@ type ListRowProps = BaseProps &
 export function ListRow(props: ListRowProps) {
   const { theme } = useUnistyles();
   const { label, subtitle, danger } = props;
+  const soon = props.type === 'link' && props.soon === true;
 
   const text = (
     <View style={styles.text}>
-      <Text style={[styles.label, danger && styles.labelDanger]}>{label}</Text>
+      <Text style={[styles.label, danger && styles.labelDanger, soon && styles.labelSoon]}>
+        {label}
+      </Text>
       {subtitle !== undefined && <Text style={styles.subtitle}>{subtitle}</Text>}
     </View>
   );
@@ -46,11 +49,12 @@ export function ListRow(props: ListRowProps) {
     <Pressable
       accessibilityRole="button"
       disabled={props.onPress === undefined}
+      accessibilityState={soon ? { disabled: true } : undefined}
       onPress={props.onPress}
       style={({ pressed }) => [styles.row, pressed && props.onPress !== undefined && styles.pressed]}
     >
       {text}
-      <ChevronRightIcon color={theme.colors.text.muted} />
+      {!soon && <ChevronRightIcon color={theme.colors.text.muted} />}
     </Pressable>
   );
 }
@@ -85,6 +89,10 @@ const styles = StyleSheet.create((theme) => ({
   },
   labelDanger: {
     color: theme.colors.danger,
+  },
+  /** "Coming soon" rows read disabled — present, honest, not tappable. */
+  labelSoon: {
+    color: theme.colors.text.muted,
   },
   subtitle: {
     fontFamily: theme.fontFamily.regular,
